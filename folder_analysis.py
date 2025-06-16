@@ -100,7 +100,7 @@ class Folder_Analyzer:
             #Collect folder properties data
             folder_data = {
                 'depth': depth,
-                'folder_name': os.path.basename(folder_path),
+                'folder_name': os.path.basename(os.path.normpath(folder_path)) or folder_path,
                 'folder_path': folder_path,
                 'folder_size': size_formatted,
                 'total_files': file_count,
@@ -168,9 +168,22 @@ class Folder_Analyzer:
                 ws1.cell(row=1, column=i + 1, value=f"Level {i}")
             
             #Fill in the rows
+            base_path_parts = os.path.normpath(self.input_path).split(os.sep)
+
             for idx, folder in enumerate(folder_data, start=2):
-                ws1.cell(row=idx, column=folder['depth'] + 1, value=folder['folder_name'])
+                rel_path_parts = os.path.normpath(folder['folder_path']).split(os.sep)
                 
+                # Get only the parts relative to base
+                relative_parts = rel_path_parts[len(base_path_parts):]
+
+                # If it's the root folder, write the root name in Level 0
+                if not relative_parts:
+                    root_name = os.path.basename(self.input_path.rstrip(os.sep)) or self.input_path
+                    ws1.cell(row=idx, column=1, value=root_name)
+                else:
+                    for level_idx, folder_part in enumerate(relative_parts):
+                        ws1.cell(row=idx, column=level_idx + 1, value=folder_part)
+                        
             #Sheet 2: Folder Properties
             ws2 = wb.create_sheet(title="Folder_Properties")
 
