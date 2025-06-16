@@ -137,7 +137,6 @@ class Folder_Analyzer:
     def create_excel(self, folder_data, output_file):
         try:
             wb = openpyxl.Workbook()
-            ws = wb.active
 
             property_headers = [
                 'folder_name',
@@ -158,18 +157,31 @@ class Folder_Analyzer:
                 'comment'
             ]
 
+            #Sheet 1: Folder Hierarchy
+            ws1 = wb.active
+            ws1.title = "Folder_Hierarchy"
+
             max_depth = max(folder['depth'] for folder in folder_data)
 
+            #Write level headers
             for i in range(max_depth + 1):
-                ws.cell(row=1, column=i + 1, value=f"Level {i}")
-
-            for j, header in enumerate(property_headers, start=max_depth + 2):
-                ws.cell(row=1, column=j, value=header)
-
+                ws1.cell(row=1, column=i + 1, value=f"Level {i}")
+            
+            #Fill in the rows
             for idx, folder in enumerate(folder_data, start=2):
-                ws.cell(row=idx, column=folder['depth'] + 1, value=folder['folder_name'])
-                for j, header in enumerate(property_headers, start=max_depth + 2):
-                    ws.cell(row=idx, column=j, value=folder.get(header, ''))
+                ws1.cell(row=idx, column=folder['depth'] + 1, value=folder['folder_name'])
+                
+            #Sheet 2: Folder Properties
+            ws2 = wb.create_sheet(title="Folder_Properties")
+
+            #Write property headers afer level column
+            all_headers = ['depth'] + property_headers
+            for col_idx, header in enumerate(all_headers, start=1):
+                ws2.cell(row=1, column=col_idx, value=header)
+
+            for row_idx, folder in enumerate(folder_data, start=2):
+                for col_idx, header in enumerate(all_headers, start=1):
+                    ws2.cell(row=row_idx, column=col_idx, value=folder.get(header, ''))
 
             wb.save(output_file)
             logging.info(f"Excel report created successfully: {output_file}")
