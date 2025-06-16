@@ -183,7 +183,7 @@ class Folder_Analyzer:
                 else:
                     for level_idx, folder_part in enumerate(relative_parts):
                         ws1.cell(row=idx, column=level_idx + 1, value=folder_part)
-                
+                        
             #Sheet 2: Folder Properties
             ws2 = wb.create_sheet(title="Folder_Properties")
 
