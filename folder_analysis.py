@@ -166,24 +166,22 @@ class Folder_Analyzer:
             #Write level headers
             for i in range(max_depth + 1):
                 ws1.cell(row=1, column=i + 1, value=f"Level {i}")
-            
-            #Fill in the rows
+
+            root_name = os.path.basename(os.path.normpath(self.input_path)) or self.input_path
             base_path_parts = os.path.normpath(self.input_path).split(os.sep)
 
+            # Fill in the rows
             for idx, folder in enumerate(folder_data, start=2):
                 rel_path_parts = os.path.normpath(folder['folder_path']).split(os.sep)
                 
-                # Get only the parts relative to base
-                relative_parts = rel_path_parts[len(base_path_parts):]
+                # Always start with root at Level 0
+                ws1.cell(row=idx, column=1, value=root_name)
 
-                # If it's the root folder, write the root name in Level 0
-                if not relative_parts:
-                    root_name = os.path.basename(self.input_path.rstrip(os.sep)) or self.input_path
-                    ws1.cell(row=idx, column=1, value=root_name)
-                else:
-                    for level_idx, folder_part in enumerate(relative_parts):
-                        ws1.cell(row=idx, column=level_idx + 1, value=folder_part)
-                
+                # Then write subfolders starting from Level 1
+                relative_parts = rel_path_parts[len(base_path_parts):]
+                for level_idx, folder_part in enumerate(relative_parts):
+                    ws1.cell(row=idx, column=level_idx + 2, value=folder_part)
+
             #Sheet 2: Folder Properties
             ws2 = wb.create_sheet(title="Folder_Properties")
 
